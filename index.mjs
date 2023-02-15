@@ -32,8 +32,12 @@ export const handler = async (event) => {
     });
     const startTime = new Date().getTime();
     const { error, stdout, stderr } = await execAsync(
-      `python3 ${codePath} < ${inputPath}`
+      `python3 ${codePath} < ${inputPath}`,
+      { timeout: 4000 }
     ).catch((error) => {
+      if (error.killed && error.signal === "SIGTERM"){
+        throw new Error("Time Limit Exceeded");
+      }
       throw error;
     });
     const endTime = new Date().getTime();
