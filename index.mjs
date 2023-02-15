@@ -30,12 +30,14 @@ export const handler = async (event) => {
     await fs.writeFile(inputPath, input, function (err) {
       if (err) throw err;
     });
-
+    const startTime = new Date().getTime();
     const { error, stdout, stderr } = await execAsync(
       `python3 ${codePath} < ${inputPath}`
     ).catch((error) => {
       throw error;
     });
+    const endTime = new Date().getTime();
+    const executionTime = endTime - startTime;
 
     const output = error || stderr || stdout;
     await fs.unlink(codePath);
@@ -46,7 +48,7 @@ export const handler = async (event) => {
         "Content-Type": "application/json",
       },
       isBase64Encoded: false,
-      body: JSON.stringify({ data: output, status: true }),
+      body: JSON.stringify({ data: output, status: true, executionTime:executionTime }),
     };
 
     return response;
